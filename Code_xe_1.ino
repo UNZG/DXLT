@@ -16,11 +16,19 @@ const int DIN2 = 4;
 
 int speed = 40;  // Tốc độ ban đầu, giữa 0 và 255
 
+int threshold=950;
+int numSensors=8;
+//cam bien, A4 la cam bien phia truoc
+int sensorPins[8] = {A7, A6, A5, A3, A2, A1, A0, A4};  
+//mảng chứa giá trị analog cảm biến
+int sensorValues_A[8]; 
+//mảng digital
+int sensorValues_D[8];  
 
-//cam bien, A3 la cam bien phia truoc
-int sensorPins[5] = {A0, A1, A2, A4, A5};  
-int sensorT=A3;
 
+// vi tri cam bien
+//                        A4
+// A7     A6      A5      A3      A2      A1      A0
 void setup() {
   pinMode(AIN1, OUTPUT);
   pinMode(AIN2, OUTPUT);
@@ -63,22 +71,10 @@ void setup() {
 }
 
 void loop() {
-  int sensorValues[5]; 
-  int sensorValuesT;
-  for (int i = 0; i <= 4; i++) {
-    sensorValues[i] = digitalRead(sensorPins[i]);
-    
-  }
-  sensorValuesT = digitalRead(sensorT);
-  for (int i = 0; i < 5; i++) {
-    Serial.print(sensorValues[i]);
-  }
-  Serial.print(" _");
-  Serial.print(sensorValuesT);
-  Serial.println();  
-
-
-
+  
+readSensorValues();
+A2D();
+Print();
 
 
 
@@ -117,33 +113,87 @@ void loop() {
 //  digitalWrite(DIN2, HIGH);
 
 
+//  forward(50);
+}
+
+void readSensorValues() {
+  for (int i = 0; i < numSensors; i++) {
+    sensorValues_A[i] = analogRead(sensorPins[i]);   
+  } 
+}
+
+//chuyển analog thành digital
+void A2D() {  
+  for (int i = 0; i < numSensors; i++) {
+    if (sensorValues_A[i] > threshold) {
+      sensorValues_D[i]=1;
+    } else {
+      sensorValues_D[i]=0;
+    }   
+  }
+}
+
+void Print() {
+  for (int i = 0; i < numSensors; i++) {
+      Serial.print(i);
+      Serial.print(":_");
+      Serial.print(sensorValues_D[i]);
+      Serial.print("   ");
+  }
+  Serial.println();
+
+}
+
+    
+  
+
+
+void forward(int speed){
+//banh truoc trai
+//quay thuan toc do speed
+  analogWrite(AIN1, speed);
+  digitalWrite(AIN2, LOW);
+//banh truoc phai
+  //quay thuan toc do speed
+  analogWrite(BIN1, speed);
+  digitalWrite(BIN2, LOW);
+//banh sau trai
+  //quay thuan toc do speed
+  analogWrite(CIN1, speed);
+  digitalWrite(CIN2, LOW);
+//banh sau phai
+  //quay thuan toc do speed
+  analogWrite(DIN1, speed);
+  digitalWrite(DIN2, LOW);
+}
+void left(){
   
 }
-
-
-
-
-void Ponderado(){
-  int sum = 0;
-  int division = 0;
-  int nove = 0;
-  char center;
-  for (int x = 0; x <= 4; x++){
-    int w = 1000;
-    if (x == 2){
-      if (digitalRead(sensorPins[x]) == 1){ center = 1; }else{ center = 0; }
-    }
-    if ( digitalRead(sensorPins[x]) == 1){
-      nove = 1;
-    }
-    int v = (1000) * (x - 2);
-    sum += (w * v);
-    division += w;
-  }
-  if (nove == 0){
-    POSICION = POSICION > 0 ? 200 : -200;
-  }else{
-    POSICION = sum / division;
-    POSICION /= 10;
-  }
+void right(){
+  
 }
+//
+//void Ponderado(){
+//  int sum = 0;
+//  int division = 0;
+//  int nove = 0;
+//  char center;
+//  for (int x = 0; x <= 6; x++){
+//    int w = 1000;
+//    if (x == 3){
+//      if (digitalRead(sensorPins[x]) == 1){ center = 1; }else{ center = 0; }
+//    }
+//    if ( digitalRead(sensorPins[x]) == 1){
+//      nove = 1;
+//    }
+//    int v = (1000) * (x - 2);
+//    sum += (w * v);
+//    division += w;
+//  }
+//  if (nove == 0){
+//    POSICION = POSICION > 0 ? 200 : -200;
+//  }else{
+//    POSICION = sum/division;
+//    POSICION = POSICION/10;
+//  }
+//}
